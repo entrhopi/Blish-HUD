@@ -117,118 +117,113 @@ namespace Blish_HUD.Controls {
         /// <inheritdoc />
         public override void RecalculateLayout() {
             // Layout zones (left to right):
-            // | (empty space) | _textBoxRectangle | SpinnerWidth |
+            // | _textBoxRectangle | SpinnerWidth |
             //
             // _horizontalOffset: shifts the text view when cursor moves
             //   - Negative offset = text shifted right, revealing left overflow
             //   - Reset to 0 when control loses focus
+            _textBoxRectangle = CalculateTextBoxRectangle();
+            _textRectangle = CalculateTextRectangle();
+            _highlightRectangle = CalculateHighlightRectangle();
+            _cursorRectangle = CalculateCursorRectangle();
+            UpdateControlWidth();
+        }
+        private Rectangle CalculateTextBoxRectangle() {
+            // The visible textbox background area (clipping region for text)
+            // - X: aligned to the right against the spinner
+            // - Y: 0 (top edge of control)
+            // - Width: the smallest between the available width and the text width with padding
+            // - Height: full control height
+            int textWidth = (_text.Length * (int)_font.MeasureString("0").Width) + TextPaddingX;
+            int finalWidth = Math.Min(Width, textWidth);
+            return new Rectangle(0, 0, finalWidth, Height);
+        }
+        private Rectangle CalculateTextRectangle() {
+            // Logical text positioning area for DrawStringOnCtrl with HorizontalAlignment.Right
+            // Text is right-aligned within this rectangle (right edge of text = right edge of rectangle)
+            //
+            // _horizontalOffset adjusts text position:
+            // - offset = 0: default position, text right edge at (textBoxWidth - padding)
+            // - offset < 0: text shifted right, revealing left overflow
+            // - offset > 0: not used (we scroll by making offset negative to reveal left overflow)
+            //
+            // Padding rules:
+            // - TextPaddingX on right when offset = 0 (normal state)
+            // - No padding when scrolled (offset != 0), text can touch edges
 
-            _textBoxRectangle = TextBoxRectangle();
+            // The right edge of the text (where right-aligned text ends)
+            // Subtracting offset: negative offset increases right edge (shifts text right)
+            int textRightEdge = _textBoxRectangle.Width - TextPaddingX - _horizontalOffset;
 
-            _textRectangle = TextRectangle();
+            // Vertical centering
+            int verticalPadding = (Height / 2) - (_font.LineHeight / 2);
 
-            _highlightRectangle = HighlightRectangle();
+            return new Rectangle(_textBoxRectangle.X, verticalPadding, textRightEdge, _font.LineHeight);
+        }
+        private Rectangle CalculateCursorRectangle() {
+            // Blinking cursor position within the text
+            // - X: calculated from right-aligned text start + width of text before cursor
+            // - Y: slightly inset from text rectangle top
+            // - Width: 2 pixels (thin cursor line)
+            // - Height: font line height minus inset
+            // - Must account for _horizontalOffset
 
-            _cursorRectangle = CursorRectangle();
-
-            Rectangle TextBoxRectangle() {
-                // The visible textbox background area (clipping region for text)
-                // - X: aligned to the right against the spinner
-                // - Y: 0 (top edge of control)
-                // - Width: the smallest between the available width and the text width with padding
-                // - Height: full control height
-                int textWidth = (_text.Length * (int)_font.MeasureString("0").Width) + TextPaddingX;
-                int finalWidth = Math.Min(Width, textWidth);
-
-                return new Rectangle(0, 0, finalWidth, Height);
+            int currentCursorIndex = _cursorIndex;
+            if (currentCursorIndex > _text.Length) {
+                currentCursorIndex = _text.Length;
             }
 
-            Rectangle TextRectangle() {
-                // Logical text positioning area for DrawStringOnCtrl with HorizontalAlignment.Right
-                // Text is right-aligned within this rectangle (right edge of text = right edge of rectangle)
-                //
-                // _horizontalOffset adjusts text position:
-                // - offset = 0: default position, text right edge at (textBoxWidth - padding)
-                // - offset < 0: text shifted right, revealing left overflow
-                // - offset > 0: not used (we scroll by making offset negative to reveal left overflow)
-                //
-                // Padding rules:
-                // - TextPaddingX on right when offset = 0 (normal state)
-                // - No padding when scrolled (offset != 0), text can touch edges
+            float textWidth = _font.MeasureString(_text).Width;
+            float textStart = _textRectangle.Right - textWidth;
+            float cursorX = textStart + _font.MeasureString(_text.Substring(0, currentCursorIndex)).Width;
 
-                // The right edge of the text (where right-aligned text ends)
-                // Subtracting offset: negative offset increases right edge (shifts text right)
-                int textRightEdge = _textBoxRectangle.Width - TextPaddingX - _horizontalOffset;
+            return new Rectangle(
+                (int)cursorX,
+                _textRectangle.Y + 2,
+                2,
+                _font.LineHeight - 4
+            );
+        }
 
-                // Vertical centering
-                int verticalPadding = (Height / 2) - (_font.LineHeight / 2);
+        private Rectangle CalculateHighlightRectangle() {
+            // Selection highlight area
+            // - X: position of selection start character (accounting for right-alignment)
+            // - Y: same as text rectangle
+            // - Width: distance from selection start to selection end
+            // - Height: font line height
+            // - Must account for _horizontalOffset
+            // - Returns Empty if no selection or invalid selection bounds
+            // - Clipped to _textBoxRectangle bounds
 
-                return new Rectangle(_textBoxRectangle.X, verticalPadding, textRightEdge, _font.LineHeight);
+            int currentSelectionStart = _selectionStart;
+            int currentSelectionEnd = _selectionEnd;
+            int selectionOffset = Math.Min(currentSelectionStart, currentSelectionEnd);
+            if (selectionOffset > _text.Length) {
+                return Rectangle.Empty;
             }
 
-            Rectangle CursorRectangle() {
-                // Blinking cursor position within the text
-                // - X: calculated from right-aligned text start + width of text before cursor
-                // - Y: slightly inset from text rectangle top
-                // - Width: 2 pixels (thin cursor line)
-                // - Height: font line height minus inset
-                // - Must account for _horizontalOffset
-
-                int currentCursorIndex = _cursorIndex;
-                if (currentCursorIndex > _text.Length) {
-                    currentCursorIndex = _text.Length;
-                }
-
-                float textWidth = _font.MeasureString(_text).Width;
-                float textStart = _textRectangle.Right - textWidth;
-                float cursorX = textStart + _font.MeasureString(_text.Substring(0, currentCursorIndex)).Width;
-
-                return new Rectangle(
-                    (int)cursorX,
-                    _textRectangle.Y + 2,
-                    2,
-                    _font.LineHeight - 4
-                );
+            int selectionLength = Math.Abs(currentSelectionStart - currentSelectionEnd);
+            if (selectionLength <= 0 || selectionOffset + selectionLength > _text.Length) {
+                return Rectangle.Empty;
             }
 
-            Rectangle HighlightRectangle() {
-                // Selection highlight area
-                // - X: position of selection start character (accounting for right-alignment)
-                // - Y: same as text rectangle
-                // - Width: distance from selection start to selection end
-                // - Height: font line height
-                // - Must account for _horizontalOffset
-                // - Returns Empty if no selection or invalid selection bounds
-                // - Clipped to _textBoxRectangle bounds
+            float textWidth = _font.MeasureString(_text).Width;
+            float textStart = _textRectangle.Right - textWidth;
+            float highlightStart = textStart + _font.MeasureString(_text.Substring(0, selectionOffset)).Width;
+            float highlightWidth = _font.MeasureString(_text.Substring(selectionOffset, selectionLength)).Width;
 
-                int currentSelectionStart = _selectionStart;
-                int currentSelectionEnd = _selectionEnd;
-                int selectionOffset = Math.Min(currentSelectionStart, currentSelectionEnd);
-                if (selectionOffset > _text.Length) {
-                    return Rectangle.Empty;
-                }
+            var highlight = new Rectangle(
+                (int)highlightStart,
+                _textRectangle.Y,
+                (int)highlightWidth,
+                _font.LineHeight
+            );
 
-                int selectionLength = Math.Abs(currentSelectionStart - currentSelectionEnd);
-                if (selectionLength <= 0 || selectionOffset + selectionLength > _text.Length) {
-                    return Rectangle.Empty;
-                }
+            // Clip to textbox bounds
+            return Rectangle.Intersect(highlight, _textBoxRectangle);
+        }
 
-                float textWidth = _font.MeasureString(_text).Width;
-                float textStart = _textRectangle.Right - textWidth;
-                float highlightStart = textStart + _font.MeasureString(_text.Substring(0, selectionOffset)).Width;
-                float highlightWidth = _font.MeasureString(_text.Substring(selectionOffset, selectionLength)).Width;
-
-                var highlight = new Rectangle(
-                    (int)highlightStart,
-                    _textRectangle.Y,
-                    (int)highlightWidth,
-                    _font.LineHeight
-                );
-
-                // Clip to textbox bounds
-                return Rectangle.Intersect(highlight, _textBoxRectangle);
-            }
-
+        private void UpdateControlWidth() {
             this.Width = _textBoxRectangle.Width + SpinnerWidth + SpinnerPadding * 2;
         }
 

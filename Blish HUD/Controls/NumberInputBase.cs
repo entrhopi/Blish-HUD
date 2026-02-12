@@ -13,8 +13,8 @@ namespace Blish_HUD.Controls {
     public abstract class NumberInputBase : TextInputBase {
         protected const int TextPaddingX = 10;
 
+        protected const int SpinnerPadding = 4;
         protected const int SpinnerWidth = 32;
-
         protected const int SpinnerButtonHeight = 16;
 
         // Points up
@@ -462,7 +462,7 @@ namespace Blish_HUD.Controls {
 
             #region Spinner
 
-            Rectangle buttonsRectangle = new Rectangle(bounds.Right - SpinnerWidth, 0, SpinnerWidth, SpinnerButtonHeight * 2);
+            Rectangle buttonsRectangle = new Rectangle(_textRectangle.Width + SpinnerPadding, 0, SpinnerWidth, SpinnerButtonHeight * 2);
             var spinnerTint = Enabled ? Color.White : StandardColors.DisabledText;
             switch ((hoverButton: _glow, pressedButton: _action)) {
                 case (NumberInputSpinnerGlow.Up, NumberInputAction.None):

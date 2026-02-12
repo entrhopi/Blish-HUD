@@ -10,7 +10,8 @@ namespace Blish_HUD.Settings.UI.Views {
         protected const int TRACKBAR_LEFT   = 220;
         protected const int TRACKBAR_WIDTH  = 280;
         protected const int TRACKBAR_HEIGHT = 20;
-        
+        protected const bool HIDE_VALUE_INPUT = false; // Some numeric settings may not want the input box, WIP: needs to be toggleable
+
         protected Label    _displayNameLabel;
         protected TrackBar _valueTrackBar;
 

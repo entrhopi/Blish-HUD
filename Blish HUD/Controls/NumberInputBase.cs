@@ -46,7 +46,7 @@ namespace Blish_HUD.Controls {
         protected string _formatString = "G"; // Default general format
 
         protected NumberInputBase() {
-            Width = 150;
+            Width = 100;
             Height = SpinnerButtonHeight * 2;
             Input.Mouse.MouseWheelScrolled += OnGlobalMouseWheelScrolled;
         }
@@ -137,10 +137,8 @@ namespace Blish_HUD.Controls {
                 // - Y: 0 (top edge of control)
                 // - Width: the smallest between the available width and the text width with padding
                 // - Height: full control height
-
-                int maxWidth = Width - SpinnerWidth;
-                int textWidth = (int)_font.MeasureString(_text).Width + TextPaddingX * 2;
-                int finalWidth = Math.Min(maxWidth, textWidth);
+                int textWidth = (_text.Length * (int)_font.MeasureString("0").Width) + TextPaddingX;
+                int finalWidth = Math.Min(Width, textWidth);
 
                 return new Rectangle(0, 0, finalWidth, Height);
             }
@@ -230,6 +228,8 @@ namespace Blish_HUD.Controls {
                 // Clip to textbox bounds
                 return Rectangle.Intersect(highlight, _textBoxRectangle);
             }
+
+            this.Width = _textBoxRectangle.Width + SpinnerWidth + SpinnerPadding * 2;
         }
 
         /// <inheritdoc />

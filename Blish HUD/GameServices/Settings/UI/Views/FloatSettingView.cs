@@ -27,8 +27,8 @@ namespace Blish_HUD.Settings.UI.Views {
                 };
 
                 _valueTrackBar.Top = (_floatInput.Height - _valueTrackBar.Height) / 2; // Center with number input
-                _valueTrackBar.Left = _floatInput.Right + CONTROL_PADDING;
-                _valueTrackBar.Width -= _floatInput.Width + CONTROL_PADDING;
+                _valueTrackBar.Left = _floatInput.Right;
+                _valueTrackBar.Width = TRACKBAR_WIDTH - _floatInput.Width - CONTROL_PADDING;
 
                 _floatInput.ValueChanged += HandleFloatInputChanged;
             } else {
@@ -66,6 +66,8 @@ namespace Blish_HUD.Settings.UI.Views {
         protected override void HandleTrackBarChanged(object sender, ValueEventArgs<float> e) {
             if (_floatInput != null) {
                 _floatInput.Value = e.Value;
+                _valueTrackBar.Width = TRACKBAR_WIDTH - _floatInput.Width;
+                _valueTrackBar.Left = _floatInput.Right;
             }
             this.OnValueChanged(new ValueEventArgs<float>(e.Value));
         }
@@ -73,6 +75,8 @@ namespace Blish_HUD.Settings.UI.Views {
         private void HandleFloatInputChanged(object sender, EventArgs e) {
             if (_floatInput != null) {
                 _valueTrackBar.Value = _floatInput.Value;
+                _valueTrackBar.Width = TRACKBAR_WIDTH - _floatInput.Width;
+                _valueTrackBar.Left = _floatInput.Right;
             }
             this.OnValueChanged(new ValueEventArgs<float>(_floatInput.Value));
         }
@@ -86,6 +90,8 @@ namespace Blish_HUD.Settings.UI.Views {
                 _floatInput.MinValue = Math.Min(_floatInput.MinValue, value);
                 _floatInput.MaxValue = Math.Max(_floatInput.MaxValue, value);
                 _floatInput.Value = value;
+                _valueTrackBar.Width = TRACKBAR_WIDTH - _floatInput.Width;
+                _valueTrackBar.Left = _floatInput.Right;
             }
         }
 

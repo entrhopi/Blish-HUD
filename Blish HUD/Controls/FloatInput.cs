@@ -116,6 +116,7 @@ namespace Blish_HUD.Controls {
 
         private void OnValueChanged() {
             ValueChanged?.Invoke(this, EventArgs.Empty);
+            this.Width = Math.Max(this.Width, ((int)_font.MeasureString(_text).Width) + TextPaddingX);
         }
 
         /// <inheritdoc />

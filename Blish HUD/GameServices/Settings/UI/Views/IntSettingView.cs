@@ -60,6 +60,8 @@ namespace Blish_HUD.Settings.UI.Views {
         protected override void HandleTrackBarChanged(object sender, ValueEventArgs<float> e) {
             if (_numberInput != null) {
                 _numberInput.Value = (int)e.Value;
+                _valueTrackBar.Width = TRACKBAR_WIDTH - _numberInput.Width;
+                _valueTrackBar.Left = _numberInput.Right;
             }
             this.OnValueChanged(new ValueEventArgs<int>((int)e.Value));
         }
@@ -67,6 +69,8 @@ namespace Blish_HUD.Settings.UI.Views {
         private void HandleNumberInputChanged(object sender, EventArgs e) {
             if (_numberInput != null) {
                 _valueTrackBar.Value = _numberInput.Value;
+                _valueTrackBar.Width = TRACKBAR_WIDTH - _numberInput.Width;
+                _valueTrackBar.Left = _numberInput.Right;
             }
             this.OnValueChanged(new ValueEventArgs<int>(_numberInput.Value));
         }
@@ -80,6 +84,8 @@ namespace Blish_HUD.Settings.UI.Views {
                 _numberInput.MinValue = Math.Min(_numberInput.MinValue, value);
                 _numberInput.MaxValue = Math.Max(_numberInput.MaxValue, value);
                 _numberInput.Value = value;
+                _valueTrackBar.Width = TRACKBAR_WIDTH - _numberInput.Width;
+                _valueTrackBar.Left = _numberInput.Right;
             }
         }
 

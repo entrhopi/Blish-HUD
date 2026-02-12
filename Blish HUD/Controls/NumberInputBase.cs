@@ -14,8 +14,8 @@ namespace Blish_HUD.Controls {
         protected const int TextPaddingX = 10;
 
         protected const int SpinnerPadding = 4;
-        protected const int SpinnerWidth = 32;
-        protected const int SpinnerButtonHeight = 16;
+        protected const int SpinnerWidth = 40;
+        protected const int SpinnerButtonHeight = 20;
 
         // Points up
         protected static readonly AsyncTexture2D SpinnerSprite = AsyncTexture2D.FromAssetId(517181);
@@ -47,7 +47,7 @@ namespace Blish_HUD.Controls {
 
         protected NumberInputBase() {
             Width = 100;
-            Height = SpinnerButtonHeight * 2;
+            Height = 32;
             Input.Mouse.MouseWheelScrolled += OnGlobalMouseWheelScrolled;
         }
 
@@ -380,7 +380,6 @@ namespace Blish_HUD.Controls {
             }
 
             if (!Focused) {
-                SelectAll();
                 Invalidate();
             }
 
@@ -397,7 +396,6 @@ namespace Blish_HUD.Controls {
             base.OnInputFocusChanged(e);
             if (e.Value) {
                 StoreOriginalValue();
-                SelectAll();
                 Invalidate();
             } else {
                 ApplyTextAsValue();
@@ -457,7 +455,7 @@ namespace Blish_HUD.Controls {
 
             #region Spinner
 
-            Rectangle buttonsRectangle = new Rectangle(_textRectangle.Width + SpinnerPadding, 0, SpinnerWidth, SpinnerButtonHeight * 2);
+            Rectangle buttonsRectangle = new Rectangle(_textRectangle.Width + SpinnerPadding, (SpinnerButtonHeight * 2 - _textBoxRectangle.Height) / -2, SpinnerWidth, SpinnerButtonHeight * 2);
             var spinnerTint = Enabled ? Color.White : StandardColors.DisabledText;
             switch ((hoverButton: _glow, pressedButton: _action)) {
                 case (NumberInputSpinnerGlow.Up, NumberInputAction.None):
